@@ -3,9 +3,11 @@ module ScalarFields
 import ForwardDiff
 import MultiPoly
 
-export grad, evaluate,
-	HermiteRadialField
-
+export grad, 
+	evaluate,
+	HermiteRadialField,
+	ScalarField,
+	VectorField
 
 abstract ScalarField
 abstract VectorField
