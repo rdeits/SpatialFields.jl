@@ -1,13 +1,13 @@
-using ScalarFields
+using SpatialFields
 using Base.Test
-using PyPlot
+# using PyPlot
 
-function plot_hrbf_2d()
+function hrbf_2d_5th_power()
 	points = [1. 0; 0 1; -1 0; 0 -1]'
 	normals = [1. 1; 0 1; -1 1; 0 -1]'
 	num_points = size(points, 2)
 
-	field = HermiteRadialField(points, normals, ScalarFields.TwiceDifferentiableFunction(x -> x^5))
+	field = HermiteRadialField(points, normals, SpatialFields.TwiceDifferentiableFunction(x -> x^5))
 
 	X = linspace(-2, 2)
 	Y = linspace(-2, 2)
@@ -26,14 +26,14 @@ function plot_hrbf_2d()
 		@test isapprox((grad(field, points[:,i])' * normals[:,i] * eps)[1], evaluate(field, nudged_point), atol=1e-6)
 	end
 
-	clf()
-	hold(true)
-	PyPlot.contour(X, Y, Z, [-0.1, 0.0, 0.1])
-	for i = 1:num_points
-	    PyPlot.quiver(points[:,i]..., normals[:,i]...)
-	end
-	axis("equal")
-	show()
+	# clf()
+	# hold(true)
+	# PyPlot.contour(X, Y, Z, [-0.1, 0.0, 0.1])
+	# for i = 1:num_points
+	#     PyPlot.quiver(points[:,i]..., normals[:,i]...)
+	# end
+	# axis("equal")
+	# show()
 end
 
-plot_hrbf_2d()
+hrbf_2d_5th_power()

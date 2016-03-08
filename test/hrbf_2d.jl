@@ -1,4 +1,4 @@
-using ScalarFields
+using SpatialFields
 using Base.Test
 
 function hrbf_2d()

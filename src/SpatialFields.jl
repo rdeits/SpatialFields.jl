@@ -1,13 +1,19 @@
-module ScalarFields
+__precompile__()
+
+module SpatialFields
 
 import ForwardDiff
 import MultiPoly
+import Base: convert
 
 export grad, 
 	evaluate,
-	HermiteRadialField,
 	ScalarField,
-	VectorField
+	VectorField,
+	HermiteRadialField,
+	FunctionalVectorField,
+	PolynomialScalarField,
+	PolynomialVectorField
 
 abstract ScalarField
 abstract VectorField
@@ -31,5 +37,6 @@ function grad(field::ScalarField, x)
 end
 
 include("hrbf.jl")
+include("polynomial.jl")
 
 end # module

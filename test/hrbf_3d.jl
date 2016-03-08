@@ -1,4 +1,4 @@
-using ScalarFields
+using SpatialFields
 using Base.Test
 using Iterators
 
