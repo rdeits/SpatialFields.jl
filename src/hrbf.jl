@@ -37,11 +37,11 @@ function HermiteRadialField{T}(points::Array{T, 2}, normals::Array{T, 2}, phi_fu
 	A = Array{T}(num_points * (dimension + 1), num_points * (dimension + 1))
 	b = Array{T}(num_points * (dimension + 1))
 
-	for point_index = 1:num_points
+	@inbounds for point_index = 1:num_points
 		row = (point_index - 1) * (1 + dimension) + 1
 		for k = 1:num_points
 			col = (k - 1) * (1 + dimension) + 1
-			u = vec(points[:,point_index] - points[:,k])
+			u = points[:,point_index] - points[:,k]
 			n = norm(u)
 			if n == 0
 				A[row + (0:dimension), col + (0:dimension)] = 0
@@ -50,7 +50,7 @@ function HermiteRadialField{T}(points::Array{T, 2}, normals::Array{T, 2}, phi_fu
 				df = dphi(phi_function, n)
 				ddf = ddphi(phi_function, n)
 				df_over_n = df / n
-				v = df_over_n .* u
+				v = df_over_n * u
 
 				A[row, col] = f
 				A[row, col + (1:dimension)] = v
@@ -76,8 +76,12 @@ end
 function evaluate{T}(field::HermiteRadialField{T}, x::Vector{T})
 	value::T = zero(T)
 	dimension = size(field.points, 1)
+	num_points = size(field.points, 2)
+	@assert length(x) == dimension
+	@assert length(field.alphas) == num_points
+	@assert size(field.betas) == size(field.points)
 	u = Array{T}(dimension)
-	for i = 1:size(field.points, 2)
+	@inbounds for i = 1:size(field.points, 2)
 		for j = 1:dimension
 			u[j] = x[j] - field.points[j, i]
 		end
@@ -92,8 +96,11 @@ end
 function grad{T}(field::HermiteRadialField{T}, x::Vector)
 	dimension = size(field.points, 1)
 	num_points = size(field.points, 2)
+	@assert length(x) == dimension
+	@assert length(field.alphas) == num_points
+	@assert size(field.betas) == size(field.points)
 	g = zeros(T, dimension)
-	for i = 1:num_points
+	@inbounds for i = 1:num_points
 		u = x - field.points[:,i]
 		n = norm(u)
 
