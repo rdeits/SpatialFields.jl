@@ -36,12 +36,17 @@ function HermiteRadialField{T}(points::Array{T, 2}, normals::Array{T, 2}, phi_fu
 
 	A = Array{T}(num_points * (dimension + 1), num_points * (dimension + 1))
 	b = Array{T}(num_points * (dimension + 1))
+	u = Array{T}(dimension)
+	v = Array{T}(dimension)
 
 	@inbounds for point_index = 1:num_points
 		row = (point_index - 1) * (1 + dimension) + 1
 		for k = 1:num_points
 			col = (k - 1) * (1 + dimension) + 1
-			u = points[:,point_index] - points[:,k]
+			for i = 1:dimension
+				u[i] = points[i, point_index] - points[i, k]
+			end
+			# u = points[:,point_index] - points[:,k]
 			n = norm(u)
 			if n == 0
 				A[row + (0:dimension), col + (0:dimension)] = 0
@@ -50,12 +55,22 @@ function HermiteRadialField{T}(points::Array{T, 2}, normals::Array{T, 2}, phi_fu
 				df = dphi(phi_function, n)
 				ddf = ddphi(phi_function, n)
 				df_over_n = df / n
-				v = df_over_n * u
+				for i = 1:dimension
+					v[i] = df_over_n * u[i]
+				end
 
 				A[row, col] = f
-				A[row, col + (1:dimension)] = v
-				A[row + (1:dimension), col] = v
-				A[row + (1:dimension), col + (1:dimension)] = (ddf - df_over_n) / (n^2) * (u * u')
+				for i = 1:dimension
+					A[row, col + i] = v[i]
+					A[row + i, col] = v[i]
+				end
+				scaling = (ddf - df_over_n) / (n^2)
+				for i = 1:dimension
+					for j = 1:dimension
+						A[row + i, col + j] = scaling * u[i] * u[j]
+					end
+				end
+				# A[row + (1:dimension), col + (1:dimension)] = (ddf - df_over_n) / (n^2) * (u * u')
 				for i = 1:dimension
 					A[row + i, col + i] += df_over_n
 				end

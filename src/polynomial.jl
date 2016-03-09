@@ -8,9 +8,21 @@ type PolynomialVectorField{T} <: VectorField
 end
 convert{T}(::Type{VectorField}, partials::Vector{MultiPoly.MPoly{T}}) = PolynomialVectorField(partials)
 
+function evaluate{T}(polynomial::MultiPoly.MPoly{T}, x::Vector{T})
+	@assert length(x) == length(polynomial.vars)
+	result::T = zero(T)
+	for (powers, coeff) in polynomial.terms
+		term::T = zero(T)
+		for i = 1:length(powers)
+			term += x[i] ^ powers[i]
+		end
+		result += term * coeff
+	end
+	result
+end
+
 function evaluate{T}(field::PolynomialScalarField{T}, x)
-	@assert length(x) == length(field.polynomial.vars)
-	MultiPoly.evaluate(field.polynomial, x...)
+	evaluate(field.polynomial, x)
 end
 
 function grad{T}(field::PolynomialScalarField{T})
@@ -18,5 +30,5 @@ function grad{T}(field::PolynomialScalarField{T})
 	PolynomialVectorField(diffs)
 end
 
-evaluate{T}(field::PolynomialVectorField{T}, x) = [MultiPoly.evaluate(p, x...) for p in field.partials]
+evaluate{T}(field::PolynomialVectorField{T}, x) = [evaluate(p, x) for p in field.partials]
 
