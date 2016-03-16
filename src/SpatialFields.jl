@@ -8,6 +8,7 @@ import MultiPoly
 import Base: convert
 
 export Point,
+	Normal,
 	grad,
 	evaluate,
 	ScalarField,

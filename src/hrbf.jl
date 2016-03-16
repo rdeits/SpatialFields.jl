@@ -29,7 +29,7 @@ type HermiteRadialField{N, T} <: ScalarField
 	phi::BaseTwiceDifferentiableFunction
 end
 
-function HermiteRadialField{Dimension, T}(points::Vector{Point{Dimension, T}}, normals::Vector{Point{Dimension, T}}, phi_function::BaseTwiceDifferentiableFunction=PhiXCubed())
+function HermiteRadialField{Dimension, T}(points::Vector{Point{Dimension, T}}, normals::Vector{Normal{Dimension, T}}, phi_function::BaseTwiceDifferentiableFunction=PhiXCubed())
 	@assert length(points) == length(normals)
 	num_points = length(points)
 
@@ -139,5 +139,5 @@ end
 grad{Dimension, T}(field::HermiteRadialField{Dimension, T}, x) = grad(field, convert(Point{Dimension, T}, x))
 
 function grad{Dimension, T}(field::HermiteRadialField{Dimension, T})
-	FunctionalVectorField(x -> grad{Dimension, T}(field, x))
+	FunctionalVectorField{Dimension, T}(x -> grad{Dimension, T}(field, x))
 end
