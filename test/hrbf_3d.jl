@@ -3,8 +3,9 @@ using Base.Test
 using Iterators
 
 function hrbf_3d()
-	points = [1. 0 0; 0 1 0; -1 0 0; 0 -1 0; 0 0 1; 0 0 -1]'
-	normals = [1. -1 0; 0 1 0; -1 0 0; 0 -1 0; 1 0 1; 0 0 -1]'
+	points = Point{3, Float64}[[1; 0; 0], [0; 1; 0], [-1; 0; 0], [0; -1; 0], [0; 0; 1], [0; 0; -1]]
+	normals = Point{3, Float64}[[1; -1; 0], [0; 1; 0], [-1; 0; 0], [0; -1; 0], [1; 0; 1], [0; 0; -1]]
+
 
 	field = HermiteRadialField(points, normals)
 	@time field = HermiteRadialField(points, normals)
