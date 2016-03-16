@@ -8,13 +8,13 @@ type PolynomialVectorField{T} <: VectorField
 end
 convert{T}(::Type{VectorField}, partials::Vector{MultiPoly.MPoly{T}}) = PolynomialVectorField(partials)
 
-function evaluate{T}(polynomial::MultiPoly.MPoly{T}, x::Vector{T})
+function evaluate{T}(polynomial::MultiPoly.MPoly{T}, x)
 	@assert length(x) == length(polynomial.vars)
 	result::T = zero(T)
 	for (powers, coeff) in polynomial.terms
-		term::T = zero(T)
+		term::T = one(T)
 		for i = 1:length(powers)
-			term += x[i] ^ powers[i]
+			term *= x[i] ^ powers[i]
 		end
 		result += term * coeff
 	end
