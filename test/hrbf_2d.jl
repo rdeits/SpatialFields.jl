@@ -25,6 +25,9 @@ function hrbf_2d()
 		nudged_point = points[i] + eps * Point(normals[i])
 		@test isapprox(dot(grad(field, points[i]), Point(normals[i]) * eps), evaluate(field, nudged_point), atol=1e-6)
 	end
+
+	g = grad(field)
+	@test isapprox(evaluate(g, Point(1.,0)), [1;1])
 end
 
 hrbf_2d()
