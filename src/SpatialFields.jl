@@ -6,6 +6,7 @@ using GeometryTypes
 import ForwardDiff
 import MultiPoly
 import Base: convert
+import DataStructures: OrderedDict
 
 export Point,
 	Normal,

@@ -33,6 +33,7 @@ function HermiteRadialField{Dimension, T}(points::Vector{Point{Dimension, T}}, n
 	@assert length(points) == length(normals)
 
 	if any(n -> any(isnan, n), normals)
+		error("Should not get nans as normals anymore")
 		valid_points = !map(n -> any(isnan, n), normals)
 		return HermiteRadialField(points[valid_points], normals[valid_points], phi_function)
 	end
