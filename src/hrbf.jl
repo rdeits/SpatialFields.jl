@@ -31,6 +31,11 @@ end
 
 function HermiteRadialField{Dimension, T}(points::Vector{Point{Dimension, T}}, normals::Vector{Normal{Dimension, T}}, phi_function::BaseTwiceDifferentiableFunction=PhiXCubed())
 	@assert length(points) == length(normals)
+
+	if any(n -> any(isnan, n), normals)
+		valid_points = !map(n -> any(isnan, n), normals)
+		return HermiteRadialField(points[valid_points], normals[valid_points], phi_function)
+	end
 	num_points = length(points)
 
 	A = Array{T}(num_points * (Dimension + 1), num_points * (Dimension + 1))
@@ -86,6 +91,12 @@ function HermiteRadialField{Dimension, T}(points::Vector{Point{Dimension, T}}, n
 
 	y = A \ b
 	y = reshape(y, Dimension + 1, num_points)
+	if any(isnan(y))
+		@show A
+		@show b
+		@show y
+		error("got nans after linear system solve")
+	end
 	alphas = vec(y[1,:])
 	betas = [Point{Dimension, T}(y[2:end, i]) for i in 1:num_points]
 	# betas = y[2:end,:]
@@ -139,5 +150,5 @@ end
 grad{Dimension, T}(field::HermiteRadialField{Dimension, T}, x) = grad(field, convert(Point{Dimension, T}, x))
 
 function grad{Dimension, T}(field::HermiteRadialField{Dimension, T})
-	FunctionalVectorField{Dimension, T}(x -> grad{Dimension, T}(field, x))
+	FunctionalVectorField{Dimension, T}(x -> grad(field, x))
 end
