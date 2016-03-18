@@ -3,9 +3,7 @@ using Base.Test
 
 function hrbf_2d()
 	points = Point{2, Float64}[[1; 0], [0; 1], [-1; 0], [0; -1]]
-	# points = [1. 0; 0 1; -1 0; 0 -1]'
 	normals = Normal{2, Float64}[[1; 1], [0; 1], [-1; 1], [0; -1]]
-	# normals = [1. 1; 0 1; -1 1; 0 -1]'
 
 	field = HermiteRadialField(points, normals)
 

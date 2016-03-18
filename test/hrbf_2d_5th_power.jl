@@ -4,9 +4,7 @@ using Base.Test
 
 function hrbf_2d_5th_power()
 	points = Point{2, Float64}[[1; 0], [0; 1], [-1; 0], [0;-1]]
-	# points = [1. 0; 0 1; -1 0; 0 -1]'
 	normals = Normal{2, Float64}[[1; 1], [0; 1], [-1; 1], [0; -1]]
-	# normals = [1. 1; 0 1; -1 1; 0 -1]'
 	num_points = size(points, 2)
 
 	field = HermiteRadialField(points, normals, SpatialFields.TwiceDifferentiableFunction(x -> x^5))
