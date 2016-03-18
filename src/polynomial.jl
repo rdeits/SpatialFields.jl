@@ -33,24 +33,25 @@ end
 evaluate{T}(field::PolynomialVectorField{T}, x) = [evaluate(p, x) for p in field.partials]
 
 function convert{N, T}(::Type{Array{T, 2}}, points::Vector{Point{N, T}})
-	A = Array{T}(length(points), N)
-	for i = 1:length(points)
-		for j = 1:N
-			A[i,j] = points[i][j]
+	A = Array{T}(N, length(points))
+	for i = 1:N
+		for j = 1:length(points)
+			A[i,j] = points[j][i]
 		end
 	end
 	A
 end
 
 function linear_fit{T}(coordinates::Array{T, 2}, data::Vector{T})
-	dimension = size(coordinates, 2)
-	v0 = mean(data)
-	v1 = coordinates \ data
-	coeffs = OrderedDict(zeros(dimension) => v0)
+	dimension = size(coordinates, 1)
+	num_points = size(coordinates, 2)
+	A = hcat(coordinates', ones(num_points))
+	v = A \ data
+	coeffs = OrderedDict(zeros(dimension) => v[end])
 	for j = 1:dimension
 		powers = zeros(Int, dimension)
 		powers[j] = 1
-		coeffs[powers] = v1[dimension]
+		coeffs[powers] = v[j]
 	end
 	return MultiPoly.MPoly{T}(coeffs, [:x, :y, :z][1:dimension])
 end
