@@ -2,13 +2,13 @@
 abstract BaseTwiceDifferentiableFunction
 
 type TwiceDifferentiableFunction <: BaseTwiceDifferentiableFunction
-	f::Function
-	df::Function
-	ddf::Function
+	f
+	df
+	ddf
 end
-phi(func::TwiceDifferentiableFunction, x) = func.f(x)
-dphi(func::TwiceDifferentiableFunction, x) = func.df(x)
-ddphi(func::TwiceDifferentiableFunction, x) = func.ddf(x)
+# phi(func::TwiceDifferentiableFunction, x) = func.f(x)
+# dphi(func::TwiceDifferentiableFunction, x) = func.df(x)
+# ddphi(func::TwiceDifferentiableFunction, x) = func.ddf(x)
 
 function TwiceDifferentiableFunction(f::Function)
 	TwiceDifferentiableFunction(f,
@@ -16,11 +16,19 @@ function TwiceDifferentiableFunction(f::Function)
 		x -> ForwardDiff.derivative(y -> ForwardDiff.derivative(f, y), x))
 end
 
-type PhiXCubed <: BaseTwiceDifferentiableFunction
-end
-phi(::PhiXCubed, x) = x^3
-dphi(::PhiXCubed, x) = 3x^2
-ddphi(::PhiXCubed, x) = 6x
+# const XCubed = TwiceDifferentiableFunction(@anon x -> x^3, @anon x -> 3x^2, @anon x -> 6x)
+
+# immutable PhiXCubed <: BaseTwiceDifferentiableFunction
+# end
+# @inline function phi(::PhiXCubed, x)
+# 	x^3
+# end
+# @inline function dphi(::PhiXCubed, x)
+# 	3x^2
+# end
+# @inline function ddphi(::PhiXCubed, x)
+# 	6x
+# end
 
 type HermiteRadialField{N, T} <: ScalarField
 	alphas::Vector{T}
@@ -29,7 +37,7 @@ type HermiteRadialField{N, T} <: ScalarField
 	phi::BaseTwiceDifferentiableFunction
 end
 
-function HermiteRadialField{Dimension, T}(points::Vector{Point{Dimension, T}}, normals::Vector{Normal{Dimension, T}}, phi_function::BaseTwiceDifferentiableFunction=PhiXCubed())
+function HermiteRadialField{Dimension, T}(points::Vector{Point{Dimension, T}}, normals::Vector{Normal{Dimension, T}}, phi_function::BaseTwiceDifferentiableFunction=XCubed)
 	@assert length(points) == length(normals)
 
 	if any(n -> any(isnan, n), normals)
@@ -57,9 +65,12 @@ function HermiteRadialField{Dimension, T}(points::Vector{Point{Dimension, T}}, n
 			if n == 0
 				A[row + (0:Dimension), col + (0:Dimension)] = 0
 			else
-				f = phi(phi_function, n)
-				df = dphi(phi_function, n)
-				ddf = ddphi(phi_function, n)
+				f = phi_function.f(n)
+				df = phi_function.df(n)
+				ddf = phi_function.ddf(n)
+				# f = phi(phi_function, n)
+				# df = dphi(phi_function, n)
+				# ddf = ddphi(phi_function, n)
 				df_over_n = df / n
 				v = df_over_n * u
 				# for i = 1:Dimension
@@ -110,14 +121,22 @@ function evaluate{Dimension, T}(field::HermiteRadialField{Dimension, T}, x::Poin
 	@assert length(x) == Dimension
 	@assert length(field.alphas) == num_points
 	@assert length(field.betas) == length(field.points)
-	for i = 1:length(field.points)
+	@inbounds for i = 1:length(field.points)
 		u = x - field.points[i]
 		# for j = 1:dimension
 		# 	u[j] = x[j] - field.points[j, i]
 		# end
 		n = norm(u)
 		if n > 0
-			value += field.alphas[i] * phi(field.phi, n) + dphi(field.phi, n) / n * dot(field.betas[i], u)
+			z::T = dot(field.betas[i], u)
+			p = field.phi.f(n)
+			dp = field.phi.df(n)
+			# p::T = phi(field.phi, n)
+			# dp::T = dphi(field.phi, n)
+			# p = n^3
+			# dp = 3n^2
+			value += field.alphas[i] * p
+			value += dp / n * z
 		end
 	end
 	value
@@ -137,8 +156,10 @@ function grad{Dimension, T}(field::HermiteRadialField{Dimension, T}, x::Point{Di
 
 		if n > 1e-5
 			uhat = u ./ n
-			df = dphi(field.phi, n)
-			ddf = ddphi(field.phi, n)
+			df = field.phi.df(n)
+			ddf = field.phi.ddf(n)
+			# df = dphi(field.phi, n)
+			# ddf = ddphi(field.phi, n)
 			alpha_df = field.alphas[i] * df
 			beta_uhat = dot(field.betas[i], uhat)
 

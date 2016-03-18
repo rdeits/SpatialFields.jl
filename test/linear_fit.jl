@@ -7,14 +7,11 @@ function test_linear_fit()
     x, y = MultiPoly.generators(MultiPoly.MPoly{Float64}, :x, :y)
 
     true_polynomial = 3 + 4x - 7y
-    @show true_polynomial
 
     points = Point{2, Float64}[[5; -2], [-1; 10], [-1; 11]]
     data = Float64[MultiPoly.evaluate(true_polynomial, p...) for p in points]
-    @show data
 
     fit_polynomial = SpatialFields.linear_fit(points, data)
-    @show fit_polynomial
 
     for p in points
         @test isapprox(MultiPoly.evaluate(fit_polynomial, p...), MultiPoly.evaluate(true_polynomial, p...))
