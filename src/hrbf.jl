@@ -6,9 +6,9 @@ type TwiceDifferentiableFunction <: BaseTwiceDifferentiableFunction
 	df
 	ddf
 end
-# phi(func::TwiceDifferentiableFunction, x) = func.f(x)
-# dphi(func::TwiceDifferentiableFunction, x) = func.df(x)
-# ddphi(func::TwiceDifferentiableFunction, x) = func.ddf(x)
+phi(func::TwiceDifferentiableFunction, x) = func.f(x)
+dphi(func::TwiceDifferentiableFunction, x) = func.df(x)
+ddphi(func::TwiceDifferentiableFunction, x) = func.ddf(x)
 
 function TwiceDifferentiableFunction(f::Function)
 	TwiceDifferentiableFunction(f,
@@ -30,14 +30,21 @@ end
 # 	6x
 # end
 
-type HermiteRadialField{N, T} <: ScalarField
+immutable XCubed <: BaseTwiceDifferentiableFunction
+end
+
+phi(::XCubed, x) = x^3
+dphi(::XCubed, x) = 3x^2
+ddphi(::XCubed, x) = 6x
+
+type HermiteRadialField{N, T, PhiType} <: ScalarField
 	alphas::Vector{T}
 	betas::Vector{Point{N, T}}
 	points::Vector{Point{N, T}}
-	phi::BaseTwiceDifferentiableFunction
+	phi::PhiType
 end
 
-function HermiteRadialField{Dimension, T}(points::Vector{Point{Dimension, T}}, normals::Vector{Normal{Dimension, T}}, phi_function::BaseTwiceDifferentiableFunction=XCubed)
+function HermiteRadialField{Dimension, T, PhiType <: BaseTwiceDifferentiableFunction}(points::Vector{Point{Dimension, T}}, normals::Vector{Normal{Dimension, T}}, phi_function::PhiType=XCubed())
 	@assert length(points) == length(normals)
 
 	if any(n -> any(isnan, n), normals)
@@ -65,12 +72,12 @@ function HermiteRadialField{Dimension, T}(points::Vector{Point{Dimension, T}}, n
 			if n == 0
 				A[row + (0:Dimension), col + (0:Dimension)] = 0
 			else
-				f = phi_function.f(n)
-				df = phi_function.df(n)
-				ddf = phi_function.ddf(n)
-				# f = phi(phi_function, n)
-				# df = dphi(phi_function, n)
-				# ddf = ddphi(phi_function, n)
+				# f = phi_function.f(n)
+				# df = phi_function.df(n)
+				# ddf = phi_function.ddf(n)
+				f = phi(phi_function, n)
+				df = dphi(phi_function, n)
+				ddf = ddphi(phi_function, n)
 				df_over_n = df / n
 				v = df_over_n * u
 				# for i = 1:Dimension
@@ -112,10 +119,10 @@ function HermiteRadialField{Dimension, T}(points::Vector{Point{Dimension, T}}, n
 	alphas = vec(y[1,:])
 	betas = [Point{Dimension, T}(y[2:end, i]) for i in 1:num_points]
 	# betas = y[2:end,:]
-	HermiteRadialField{Dimension, T}(alphas, betas, points, phi_function)
+	HermiteRadialField{Dimension, T, PhiType}(alphas, betas, points, phi_function)
 end
 
-function evaluate{Dimension, T}(field::HermiteRadialField{Dimension, T}, x::Point{Dimension, T})
+function evaluate{Dimension, T, PhiType}(field::HermiteRadialField{Dimension, T, PhiType}, x::Point{Dimension, T})
 	value::T = zero(T)
 	num_points = length(field.points)
 	@assert length(x) == Dimension
@@ -129,10 +136,10 @@ function evaluate{Dimension, T}(field::HermiteRadialField{Dimension, T}, x::Poin
 		n = norm(u)
 		if n > 0
 			z::T = dot(field.betas[i], u)
-			p = field.phi.f(n)
-			dp = field.phi.df(n)
-			# p::T = phi(field.phi, n)
-			# dp::T = dphi(field.phi, n)
+			# p = field.phi.f(n)
+			# dp = field.phi.df(n)
+			p = phi(field.phi, n)
+			dp = dphi(field.phi, n)
 			# p = n^3
 			# dp = 3n^2
 			value += field.alphas[i] * p
@@ -144,7 +151,7 @@ end
 
 evaluate{Dimension, T}(field::HermiteRadialField{Dimension, T}, x) = evaluate(field, convert(Point{Dimension, T}, x))
 
-function grad{Dimension, T}(field::HermiteRadialField{Dimension, T}, x::Point{Dimension, T})
+function grad{Dimension, T, PhiType}(field::HermiteRadialField{Dimension, T, PhiType}, x::Point{Dimension, T})
 	num_points = length(field.points)
 	@assert length(x) == Dimension
 	@assert length(field.alphas) == num_points
@@ -156,10 +163,10 @@ function grad{Dimension, T}(field::HermiteRadialField{Dimension, T}, x::Point{Di
 
 		if n > 1e-5
 			uhat = u ./ n
-			df = field.phi.df(n)
-			ddf = field.phi.ddf(n)
-			# df = dphi(field.phi, n)
-			# ddf = ddphi(field.phi, n)
+			# df = field.phi.df(n)
+			# ddf = field.phi.ddf(n)
+			df = dphi(field.phi, n)
+			ddf = ddphi(field.phi, n)
 			alpha_df = field.alphas[i] * df
 			beta_uhat = dot(field.betas[i], uhat)
 

@@ -3,7 +3,6 @@ VERSION >= v"0.4" && __precompile__()
 module SpatialFields
 
 using GeometryTypes
-using FastAnonymous
 import ForwardDiff
 import MultiPoly
 import Base: convert
@@ -43,12 +42,5 @@ end
 
 include("hrbf.jl")
 include("polynomial.jl")
-
-function __init__()
-	f = @anon x -> x^3
-	df = @anon x -> 3x^2
-	ddf = @anon x -> 6x
-	global const XCubed = TwiceDifferentiableFunction(f, df, ddf)
-end
 
 end # module
