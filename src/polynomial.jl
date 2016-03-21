@@ -3,10 +3,11 @@ type PolynomialScalarField{T} <: ScalarField
 end
 convert{T}(::Type{ScalarField}, poly::MultiPoly.MPoly{T}) = PolynomialScalarField(poly)
 
-type PolynomialVectorField{T} <: VectorField
-	partials::Vector{MultiPoly.MPoly{T}}
+type PolynomialVectorField{N, T} <: VectorField
+	partials::NTuple{N, MultiPoly.MPoly{T}}
 end
-convert{T}(::Type{VectorField}, partials::Vector{MultiPoly.MPoly{T}}) = PolynomialVectorField(partials)
+PolynomialVectorField{T}(partials::Vector{MultiPoly.MPoly{T}}) = PolynomialVectorField(tuple(partials...))
+convert{T}(::Type{VectorField}, partials::Vector{MultiPoly.MPoly{T}}) = PolynomialVectorField(tuple(partials...))
 
 function evaluate{T}(polynomial::MultiPoly.MPoly{T}, x)
 	@assert length(x) == length(polynomial.vars)
@@ -26,11 +27,20 @@ function evaluate{T}(field::PolynomialScalarField{T}, x)
 end
 
 function grad{T}(field::PolynomialScalarField{T})
-	diffs = [MultiPoly.diff(field.polynomial, v) for v in field.polynomial.vars]
-	PolynomialVectorField(diffs)
+	PolynomialVectorField(([MultiPoly.diff(field.polynomial, v) for v in field.polynomial.vars]...))
 end
 
-evaluate{T}(field::PolynomialVectorField{T}, x) = [evaluate(p, x) for p in field.partials]
+# evaluate{T}(field::PolynomialVectorField{N, T}, x) = Point{N, T}([evaluate(p, x) for p in field.partials])
+
+@generated function evaluate{N, T}(field::PolynomialVectorField{N, T}, x)
+	expr = quote
+		Point{$(N), $(T)}()
+	end
+	for i = 1:N
+		push!(expr.args[2].args, :(evaluate(field.partials[$(i)], x)))
+	end
+	expr
+end
 
 function convert{N, T}(::Type{Array{T, 2}}, points::Vector{Point{N, T}})
 	A = Array{T}(N, length(points))
