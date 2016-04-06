@@ -15,7 +15,9 @@ function evaluate{T}(polynomial::MultiPoly.MPoly{T}, x)
 	for (powers, coeff) in polynomial.terms
 		term::T = one(T)
 		for i = 1:length(powers)
-			term *= x[i] ^ powers[i]
+			if powers[i] != 0
+				term *= x[i] ^ powers[i]
+			end
 		end
 		result += term * coeff
 	end
