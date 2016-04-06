@@ -15,6 +15,7 @@ export Point,
 	ScalarField,
 	VectorField,
 	HermiteRadialField,
+	InterpolatingSurface,
 	FunctionalVectorField,
 	PolynomialScalarField,
 	PolynomialVectorField
@@ -40,7 +41,9 @@ function grad(field::ScalarField, x)
 	evaluate(grad(field), x)
 end
 
+include("radial_functions.jl")
 include("hrbf.jl")
+include("interpolating.jl")
 include("polynomial.jl")
 
 end # module
