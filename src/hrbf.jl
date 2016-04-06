@@ -69,7 +69,7 @@ function HermiteRadialField{Dimension, T, PhiType <: BaseTwiceDifferentiableFunc
 			# end
 			# u = points[:,point_index] - points[:,k]
 			n = norm(u)
-			if n == 0
+			if n <= 1e-9
 				A[row + (0:Dimension), col + (0:Dimension)] = 0
 			else
 				# f = phi_function.f(n)
