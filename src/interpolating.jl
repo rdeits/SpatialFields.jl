@@ -5,7 +5,7 @@ type InterpolatingSurface{N, T, PhiType} <: ScalarField{N, T}
     phi::PhiType
 end
 
-function InterpolatingSurface{Dimension, T}(points::Vector{Point{Dimension, T}}, values, phi_function=XCubed())
+function InterpolatingSurface{Dimension, T}(points::Vector{Point{Dimension, T}}, values, phi_function=XSquaredLogX())
     @assert length(points) == length(values)
     @assert Dimension <= 3
 
@@ -36,13 +36,6 @@ function InterpolatingSurface{Dimension, T}(points::Vector{Point{Dimension, T}},
 
     y = A \ b
 
-    if any(isnan, y)
-        @show A
-        @show b
-        @show y
-        @show values
-        error("NaN after linear solve")
-    end
     weights = y[1:num_points]
     p = y[num_points+1:end]
 

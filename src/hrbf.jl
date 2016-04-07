@@ -8,11 +8,6 @@ end
 function HermiteRadialField{Dimension, T, PhiType <: BaseTwiceDifferentiableFunction}(points::Vector{Point{Dimension, T}}, normals::Vector{Normal{Dimension, T}}, phi_function::PhiType=XCubed())
 	@assert length(points) == length(normals)
 
-	if any(n -> any(isnan, n), normals)
-		error("Should not get nans as normals anymore")
-		valid_points = !map(n -> any(isnan, n), normals)
-		return HermiteRadialField(points[valid_points], normals[valid_points], phi_function)
-	end
 	num_points = length(points)
 
 	A = Array{T}(num_points * (Dimension + 1), num_points * (Dimension + 1))
@@ -71,15 +66,8 @@ function HermiteRadialField{Dimension, T, PhiType <: BaseTwiceDifferentiableFunc
 
 	y = A \ b
 	y = reshape(y, Dimension + 1, num_points)
-	if any(isnan(y))
-		@show A
-		@show b
-		@show y
-		error("got nans after linear system solve")
-	end
 	alphas = vec(y[1,:])
 	betas = [Point{Dimension, T}(y[2:end, i]) for i in 1:num_points]
-	# betas = y[2:end,:]
 	HermiteRadialField{Dimension, T, PhiType}(alphas, betas, points, phi_function)
 end
 
@@ -91,9 +79,6 @@ function evaluate{Dimension, T, PhiType}(field::HermiteRadialField{Dimension, T,
 	@assert length(field.betas) == length(field.points)
 	@inbounds for i = 1:length(field.points)
 		u = x - field.points[i]
-		# for j = 1:dimension
-		# 	u[j] = x[j] - field.points[j, i]
-		# end
 		n = norm(u)
 		if n > 0
 			z::T = dot(field.betas[i], u)
@@ -101,8 +86,6 @@ function evaluate{Dimension, T, PhiType}(field::HermiteRadialField{Dimension, T,
 			# dp = field.phi.df(n)
 			p = phi(field.phi, n)
 			dp = dphi(field.phi, n)
-			# p = n^3
-			# dp = 3n^2
 			value += field.alphas[i] * p
 			value += dp / n * z
 		end
