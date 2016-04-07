@@ -65,6 +65,11 @@ end
 evaluate{Dimension, T}(field::InterpolatingSurface{Dimension}, x::Vector{T}) = evaluate(field, convert(Point{Dimension, T}, x))
 
 
-    
+function bounds(field::InterpolatingSurface)
+    lb = Vec(minimum(field.points))
+    ub = Vec(maximum(field.points))
+    HyperRectangle(lb, ub - lb)
+end
+
 
 

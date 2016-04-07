@@ -125,3 +125,10 @@ grad{Dimension, T}(field::HermiteRadialField{Dimension, T}, x) = grad(field, con
 function grad{Dimension, T}(field::HermiteRadialField{Dimension, T})
 	FunctionalVectorField{Dimension, T}(x -> grad(field, x))
 end
+
+function bounds(field::HermiteRadialField)
+	lb = Vec(minimum(field.points))
+	ub = Vec(maximum(field.points))
+	HyperRectangle(lb, ub - lb)
+end
+

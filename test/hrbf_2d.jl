@@ -26,6 +26,9 @@ function hrbf_2d()
 
 	g = grad(field)
 	@test isapprox(evaluate(g, Point(1.,0)), [1;1])
+
+	@test isapprox(minimum(bounds(field)), [-1.; -1])
+	@test isapprox(maximum(bounds(field)), [1.; 1])
 end
 
 hrbf_2d()

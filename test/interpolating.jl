@@ -20,6 +20,8 @@ function test_interpolating_2d()
     g = grad(surface)
     p = Point(1.0, 0.0)
     @test isapprox(grad(surface, p), evaluate(g, p))
+
+    @test isapprox(minimum(bounds(surface)), [0.; 0])
 end
 
 test_interpolating_2d()
