@@ -12,6 +12,9 @@ notifications:
 branches:
   only: master
 
+before_install:
+  - julia -e 'Pkg.add("DataStructures"); Pkg.checkout("DataStructures")'
+
 after_success:
   - julia -e 'cd(Pkg.dir("SpatialFields")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
 # uncomment the following lines to override the default test script
