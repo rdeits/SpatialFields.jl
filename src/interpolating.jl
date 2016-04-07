@@ -63,6 +63,7 @@ function evaluate{Dimension, FieldType, InputType}(surface::InterpolatingSurface
 end
 
 evaluate{Dimension, T}(field::InterpolatingSurface{Dimension}, x::Vector{T}) = evaluate(field, convert(Point{Dimension, T}, x))
+evaluate{Dimension, T}(field::InterpolatingSurface{Dimension}, x::FixedSizeArrays.FixedVector{Dimension, T}) = evaluate(field, convert(Point{Dimension, T}, x))
 
 
 function bounds(field::InterpolatingSurface)

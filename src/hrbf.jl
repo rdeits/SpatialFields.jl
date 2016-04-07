@@ -1,4 +1,4 @@
-type HermiteRadialField{N, T, PhiType} <: ScalarField
+type HermiteRadialField{N, T, PhiType} <: ScalarField{N, T}
 	alphas::Vector{T}
 	betas::Vector{Point{N, T}}
 	points::Vector{Point{N, T}}

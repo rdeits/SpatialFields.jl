@@ -3,6 +3,8 @@ VERSION >= v"0.4" && __precompile__()
 module SpatialFields
 
 using GeometryTypes
+using Meshing
+import FixedSizeArrays
 import ForwardDiff
 import MultiPoly
 import Base: convert
@@ -10,6 +12,7 @@ import DataStructures: OrderedDict
 
 export Point,
 	Normal,
+	HomogenousMesh,
 	grad,
 	evaluate,
 	bounds,
@@ -52,5 +55,6 @@ include("radial_functions.jl")
 include("hrbf.jl")
 include("interpolating.jl")
 include("polynomial.jl")
+include("meshing.jl")
 
 end # module

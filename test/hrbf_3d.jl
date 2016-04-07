@@ -18,6 +18,8 @@ function hrbf_3d()
 	v = [X[1], Y[1], Z[1]]
 	@time for j = 1:1e5; evaluate(field, v); end
 	@time C = [evaluate(field, [x,y,z]) for (x,y,z) in product(X, Y, Z)];
+
+	mesh = convert(HomogenousMesh, field)
 end
 
 hrbf_3d()
