@@ -1,4 +1,4 @@
-type InterpolatingSurface{N, T, PhiType} <: ScalarField
+type InterpolatingSurface{N, T, PhiType} <: ScalarField{N, T}
     weights::Vector{T}
     points::Vector{Point{N, T}}
     offset::MultiPoly.MPoly{T}
@@ -56,8 +56,8 @@ function InterpolatingSurface{Dimension, T}(points::Vector{Point{Dimension, T}},
     InterpolatingSurface(weights, points, offset, phi_function)
 end
 
-function evaluate{Dimension, T}(surface::InterpolatingSurface{Dimension, T}, x::Point{Dimension, T})
-    result = zero(T)
+function evaluate{Dimension, FieldType, InputType}(surface::InterpolatingSurface{Dimension, FieldType}, x::Point{Dimension, InputType})
+    result = zero(promote_type(FieldType, InputType))
     num_points = length(surface.points)
     for i = 1:num_points
         n = norm(x - surface.points[i])
@@ -69,7 +69,7 @@ function evaluate{Dimension, T}(surface::InterpolatingSurface{Dimension, T}, x::
     result += evaluate(surface.offset, x)
 end
 
-evaluate{Dimension, T}(field::InterpolatingSurface{Dimension, T}, x) = evaluate(field, convert(Point{Dimension, T}, x))
+evaluate{Dimension, T}(field::InterpolatingSurface{Dimension}, x::Vector{T}) = evaluate(field, convert(Point{Dimension, T}, x))
 
 
     

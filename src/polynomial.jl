@@ -9,11 +9,11 @@ end
 PolynomialVectorField{T}(partials::Vector{MultiPoly.MPoly{T}}) = PolynomialVectorField(tuple(partials...))
 convert{T}(::Type{VectorField}, partials::Vector{MultiPoly.MPoly{T}}) = PolynomialVectorField(tuple(partials...))
 
-function evaluate{T}(polynomial::MultiPoly.MPoly{T}, x)
-	@assert length(x) == length(polynomial.vars)
-	result::T = zero(T)
+function evaluate{N, T1, T2}(polynomial::MultiPoly.MPoly{T1}, x::Point{N, T2})
+	@assert N == length(polynomial.vars)
+	result = zero(T2)
 	for (powers, coeff) in polynomial.terms
-		term::T = one(T)
+		term = one(T2)
 		for i = 1:length(powers)
 			if powers[i] != 0
 				term *= x[i] ^ powers[i]
@@ -23,6 +23,7 @@ function evaluate{T}(polynomial::MultiPoly.MPoly{T}, x)
 	end
 	result
 end
+evaluate{T}(polynomial::MultiPoly.MPoly, x::Vector{T}) = evaluate(polynomial, convert(Point{length(x), T}, x))
 
 function evaluate{T}(field::PolynomialScalarField{T}, x)
 	evaluate(field.polynomial, x)
