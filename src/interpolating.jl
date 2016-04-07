@@ -14,9 +14,9 @@ function InterpolatingSurface{Dimension, T}(points::Vector{Point{Dimension, T}},
     b = vcat(values, zeros(Dimension + 1))
 
     for i = 1:num_points
-        A[i, end-3] = 1.0
+        A[i, end-Dimension] = 1.0
         for j = 1:Dimension
-            A[i, end-3+j] = points[i][j]
+            A[i, end-Dimension+j] = points[i][j]
         end
         A[num_points+1, i] = 1.0
         for j = 1:Dimension
