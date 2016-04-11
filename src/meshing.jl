@@ -10,6 +10,6 @@ function surface_mesh(field::ScalarField{3}, bounds::HyperRectangle, iso_level=0
     sdf = SignedDistanceField(x -> evaluate(field, x), window, maximum(w) / sampling_rate)
     mesh = HomogenousMesh(sdf, iso_level)
 
-    rescaled_points = Point{3,Float64}[Vec(v-1) ./ (Vec(size(sdf))-1) .* (w) + lb for v in vertices(mesh)]
+    rescaled_points = Point{3,Float64}[Vec(v-1) ./ (Vec(size(sdf))-1) .* (2 * w) + lb for v in vertices(mesh)]
     return HomogenousMesh(rescaled_points, mesh.faces)
 end
