@@ -18,13 +18,13 @@ end
 immutable XCubed <: BaseTwiceDifferentiableFunction
 end
 
-phi(::XCubed, x) = x^3
-dphi(::XCubed, x) = 3x^2
-ddphi(::XCubed, x) = 6x
+@inline phi(::XCubed, x) = x^3
+@inline dphi(::XCubed, x) = 3x^2
+@inline ddphi(::XCubed, x) = 6x
 
 immutable XSquaredLogX <: BaseTwiceDifferentiableFunction
 end
 
-phi(::XSquaredLogX, x) = x^2 * log(x)
-dphi(::XSquaredLogX, x) = 2x*log(x) + x
-ddphi(::XSquaredLogX, x) = 2*log(x) + 3
+@inline phi(::XSquaredLogX, x) = x^2 * log(x)
+@inline dphi(::XSquaredLogX, x) = 2x*log(x) + x
+@inline ddphi(::XSquaredLogX, x) = 2*log(x) + 3
