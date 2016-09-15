@@ -8,12 +8,11 @@ function test_polynomial()
 
   field = PolynomialScalarField(poly)
 
-  @test isapprox(evaluate(field, [3., 7.]), MultiPoly.evaluate(poly, 3., 7.))
+  @test isapprox(field([3., 7.]), MultiPoly.evaluate(poly, 3., 7.))
 
-  vec_field = grad(field)
+  vec_field = SpatialFields.gradient(field)
   x = [100, 200]
-  @test isapprox(evaluate(vec_field, x), grad(field, x))
-  @test isapprox(evaluate(vec_field, x),
+  @test isapprox(vec_field(x),
                  Float64[MultiPoly.evaluate(MultiPoly.diff(poly, v),
                                      x[1], x[2]) for v in [:x, :y]])
 end

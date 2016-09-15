@@ -3,8 +3,8 @@ using Base.Test
 using Iterators
 
 function hrbf_3d()
-	points = Point{3, Float64}[[1; 0; 0], [0; 1; 0], [-1; 0; 0], [0; -1; 0], [0; 0; 1], [0; 0; -1]]
-	normals = Normal{3, Float64}[[1; -1; 0], [0; 1; 0], [-1; 0; 0], [0; -1; 0], [1; 0; 1], [0; 0; -1]]
+	points = SVector{3, Float64}[[1; 0; 0], [0; 1; 0], [-1; 0; 0], [0; -1; 0], [0; 0; 1], [0; 0; -1]]
+	normals = SVector{3, Float64}[[1; -1; 0], [0; 1; 0], [-1; 0; 0], [0; -1; 0], [1; 0; 1], [0; 0; -1]]
 
 
 	field = HermiteRadialField(points, normals)
@@ -14,12 +14,10 @@ function hrbf_3d()
 	Y = linspace(-2, 2)
 	Z = linspace(-2, 2)
 
-	evaluate(field, [X[1], Y[1], Z[1]])
+	field([X[1], Y[1], Z[1]])
 	v = [X[1], Y[1], Z[1]]
-	@time for j = 1:1e5; evaluate(field, v); end
-	@time C = [evaluate(field, [x,y,z]) for (x,y,z) in product(X, Y, Z)];
-
-	mesh = convert(HomogenousMesh, field)
+	@time for j = 1:1e5; field(v); end
+	@time C = [field([x,y,z]) for (x,y,z) in product(X, Y, Z)];
 end
 
 hrbf_3d()

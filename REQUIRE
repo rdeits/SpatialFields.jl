@@ -1,5 +1,4 @@
-julia 0.4
-ForwardDiff
+julia 0.5-
+ForwardDiff 0.2.5
 MultiPoly 0.1
-GeometryTypes
-Meshing
+StaticArrays
