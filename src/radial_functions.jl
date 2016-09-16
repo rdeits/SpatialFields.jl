@@ -1,30 +1,21 @@
-abstract BaseTwiceDifferentiableFunction
+immutable XCubed <: Function end
+@inline (::XCubed)(x) = x^3
+derivative(::XCubed) = dXCubed()
 
-type TwiceDifferentiableFunction <: BaseTwiceDifferentiableFunction
-	f
-	df
-	ddf
-end
-phi(func::TwiceDifferentiableFunction, x) = func.f(x)
-dphi(func::TwiceDifferentiableFunction, x) = func.df(x)
-ddphi(func::TwiceDifferentiableFunction, x) = func.ddf(x)
+immutable dXCubed <: Function end
+@inline (::dXCubed)(x) = 3x^2
+derivative(::dXCubed) = ddXCubed()
 
-function TwiceDifferentiableFunction(f::Function)
-	TwiceDifferentiableFunction(f,
-		x -> ForwardDiff.derivative(f, x),
-		x -> ForwardDiff.derivative(y -> ForwardDiff.derivative(f, y), x))
-end
+immutable ddXCubed <: Function end
+@inline (::ddXCubed)(x) = 6x
 
-immutable XCubed <: BaseTwiceDifferentiableFunction
-end
+immutable XSquaredLogX <: Function end
+@inline (::XSquaredLogX)(x) = x^2 * log(x)
+derivative(::XSquaredLogX) = dXSquaredLogX()
 
-@inline phi(::XCubed, x) = x^3
-@inline dphi(::XCubed, x) = 3x^2
-@inline ddphi(::XCubed, x) = 6x
+immutable dXSquaredLogX <: Function end
+@inline (::dXSquaredLogX)(x) = 2x*log(x) + x
+derivative(::dXSquaredLogX) = ddXSquaredLogX()
 
-immutable XSquaredLogX <: BaseTwiceDifferentiableFunction
-end
-
-@inline phi(::XSquaredLogX, x) = x^2 * log(x)
-@inline dphi(::XSquaredLogX, x) = 2x*log(x) + x
-@inline ddphi(::XSquaredLogX, x) = 2*log(x) + 3
+immutable ddXSquaredLogX <: Function end
+@inline (::ddXSquaredLogX)(x) = 2*log(x) + 3

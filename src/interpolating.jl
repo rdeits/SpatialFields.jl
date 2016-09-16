@@ -1,11 +1,12 @@
-type InterpolatingSurface{N, T, PhiType} <: ScalarField{N, T}
+type InterpolatingSurface{N, T, F <: Function} <: AbstractScalarField{N}
     weights::Vector{T}
-    points::Vector{Point{N, T}}
+    points::Vector{SVector{N, T}}
     offset::MultiPoly.MPoly{T}
-    phi::PhiType
+    phi::F
 end
 
-function InterpolatingSurface{Dimension, T}(points::Vector{Point{Dimension, T}}, values, phi_function=XSquaredLogX())
+function InterpolatingSurface{Dimension, T}(points::Vector{SVector{Dimension, T}}, values::AbstractVector{T},
+    phi::Function=XSquaredLogX())
     @assert length(points) == length(values)
     @assert Dimension <= 3
 
@@ -27,7 +28,7 @@ function InterpolatingSurface{Dimension, T}(points::Vector{Point{Dimension, T}},
                 v = points[i] - points[j]
                 n = norm(v)
                 if n >= 1e-9
-                    f = phi(phi_function, n)
+                    f = phi(n)
                     A[i,j] = f
                 end
             end
@@ -46,31 +47,18 @@ function InterpolatingSurface{Dimension, T}(points::Vector{Point{Dimension, T}},
         terms[powers] = p[i+1]
     end
     offset = MultiPoly.MPoly{T}(terms, [:x, :y, :z][1:Dimension])
-    InterpolatingSurface(weights, points, offset, phi_function)
+    InterpolatingSurface(weights, points, offset, phi)
 end
 
-function evaluate{Dimension, FieldType, InputType}(surface::InterpolatingSurface{Dimension, FieldType}, x::Point{Dimension, InputType})
-    result = zero(promote_type(FieldType, InputType))
+function (surface::InterpolatingSurface{N, Ts}){N, Ts, Tx}(x::AbstractVector{Tx})
+    result = zero(promote_type(Ts, Tx))
     num_points = length(surface.points)
     for i = 1:num_points
         n = norm(x - surface.points[i])
         if n >= 1e-9
-            result += surface.weights[i] * phi(surface.phi, n)
+            result += surface.weights[i] * surface.phi(n)
         end
     end
-    
+
     result += evaluate(surface.offset, x)
 end
-
-evaluate{Dimension, T}(field::InterpolatingSurface{Dimension}, x::Vector{T}) = evaluate(field, convert(Point{Dimension, T}, x))
-evaluate{Dimension, T}(field::InterpolatingSurface{Dimension}, x::FixedSizeArrays.FixedVector{Dimension, T}) = evaluate(field, convert(Point{Dimension, T}, x))
-
-
-function bounds(field::InterpolatingSurface)
-    lb = Vec(minimum(field.points))
-    ub = Vec(maximum(field.points))
-    HyperRectangle(lb, ub - lb)
-end
-
-
-

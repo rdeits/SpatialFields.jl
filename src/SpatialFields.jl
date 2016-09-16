@@ -1,60 +1,41 @@
-VERSION >= v"0.4" && __precompile__()
+__precompile__()
 
 module SpatialFields
 
-using GeometryTypes
-using Meshing
-import FixedSizeArrays
 import ForwardDiff
 import MultiPoly
 import Base: convert
 import DataStructures: OrderedDict
+import StaticArrays: SVector
 
-export Point,
-	Normal,
-	HomogenousMesh,
-	grad,
-	evaluate,
-	bounds,
-	ScalarField,
-	VectorField,
-	HermiteRadialField,
-	InterpolatingSurface,
-	FunctionalVectorField,
-	PolynomialScalarField,
-	PolynomialVectorField
+export InterpolatingSurface,
+    HermiteRadialField,
+    PolynomialScalarField,
+    PolynomialVectorField
 
-abstract ScalarField{N, T}
-abstract VectorField{N, T}
+derivative(f::Function) = x -> ForwardDiff.derivative(f, x)
+gradient(f::Function) = x -> ForwardDiff.gradient(f, x)
 
+abstract AbstractScalarField{N}
+abstract AbstractVectorField{N}
 
-type FunctionalVectorField{N, T} <: VectorField{N, T}
-	f::Function
+type ScalarField{N, F <: Function} <: AbstractScalarField{N}
+    func::F
 end
-evaluate{N, T}(field::FunctionalVectorField{N, T}, x) = field.f(x)
+ScalarField{F <: Function}(N::Integer, f::F) = ScalarField{N, F}(f)
+(field::ScalarField{N}){N}(x::AbstractVector) = field.func(x)
 
-# Default gradient implementation for any scalar field, using ForwardDiff for
-# automatic differentiation. This is likely to be slower than a custom
-# gradient implementation for a particular type, but it's a useful fallback to
-# have.
-type AutoDiffVectorField{N, T} <: VectorField{N, T}
-	grad_function
+type VectorField{N, F <: Function} <: AbstractVectorField{N}
+    func::F
 end
-evaluate{N, T}(field::AutoDiffVectorField{N, T}, x::Vector{T}) = field.grad_function(x)
-evaluate{N, T}(field::AutoDiffVectorField{N, T}, x) = evaluate(field, convert(Vector{T}, x))
-function grad{N, T}(field::ScalarField{N, T})
-	AutoDiffVectorField{N, T}(ForwardDiff.gradient(x -> evaluate(field, x)))
-end
+VectorField{F <: Function}(N::Integer, f::F) = VectorField{N, F}(f)
+(field::VectorField{N}){N}(x::AbstractVector) = field.func(x)
 
-# Shortcut for evaluating the gradient without returning a vector field
-function grad(field::ScalarField, x)
-	evaluate(grad(field), x)
-end
+gradient{N}(field::AbstractScalarField{N}) = VectorField(N, x -> ForwardDiff.gradient(field, x))
 
 include("radial_functions.jl")
 include("hrbf.jl")
 include("interpolating.jl")
 include("polynomial.jl")
-include("meshing.jl")
 
 end # module

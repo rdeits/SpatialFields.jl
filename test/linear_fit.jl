@@ -1,14 +1,13 @@
 using SpatialFields
 using Base.Test
 import MultiPoly
-using GeometryTypes
 
 function test_linear_fit()
     x, y = MultiPoly.generators(MultiPoly.MPoly{Float64}, :x, :y)
 
     true_polynomial = 3 + 4x - 7y
 
-    points = Point{2, Float64}[[5; -2], [-1; 10], [-1; 11]]
+    points = SVector{2, Float64}[[5; -2], [-1; 10], [-1; 11]]
     data = Float64[MultiPoly.evaluate(true_polynomial, p...) for p in points]
 
     fit_polynomial = SpatialFields.linear_fit(points, data)
@@ -27,8 +26,8 @@ function test_vector_linear_fit()
     x, y = MultiPoly.generators(MultiPoly.MPoly{Float64}, :x, :y)
 
     true_polynomials = [3 + 4x - 7y; -1 - 8x + 2y]
-    points = Point{2, Float64}[[5; -2], [-1;10], [-1; 11]]
-    data = Point{2, Float64}[[MultiPoly.evaluate(poly, p...) for poly in true_polynomials] for p in points]
+    points = SVector{2, Float64}[[5; -2], [-1;10], [-1; 11]]
+    data = SVector{2, Float64}[[MultiPoly.evaluate(poly, p...) for poly in true_polynomials] for p in points]
 
     fit_polynomials = SpatialFields.linear_fit(points, data)
 
