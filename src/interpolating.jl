@@ -5,14 +5,14 @@ type InterpolatingSurface{N, T, F <: Function} <: AbstractScalarField{N}
     phi::F
 end
 
-function InterpolatingSurface{Dimension, T}(points::Vector{SVector{Dimension, T}}, values::AbstractVector{T},
+function InterpolatingSurface{Dimension, T, Tv}(points::Vector{SVector{Dimension, T}}, values::AbstractVector{Tv},
     phi::Function=XSquaredLogX())
     @assert length(points) == length(values)
     @assert Dimension <= 3
 
     num_points = length(points)
     A = zeros(T, num_points + Dimension + 1, num_points + Dimension + 1)
-    b = vcat(values, zeros(Dimension + 1))
+    b = vcat(values, zeros(Tv, Dimension + 1))
 
     for i = 1:num_points
         A[i, end-Dimension] = 1.0
