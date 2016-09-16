@@ -16,8 +16,8 @@ export InterpolatingSurface,
 derivative(f::Function) = x -> ForwardDiff.derivative(f, x)
 gradient(f::Function) = x -> ForwardDiff.gradient(f, x)
 
-abstract AbstractScalarField{N}
-abstract AbstractVectorField{N}
+abstract AbstractScalarField{N} <: Function
+abstract AbstractVectorField{N} <: Function
 
 type ScalarField{N, F <: Function} <: AbstractScalarField{N}
     func::F
