@@ -51,10 +51,27 @@ function InterpolatingSurface{Dimension, T, Tv}(points::Vector{SVector{Dimension
 end
 
 function (surface::InterpolatingSurface{N, Ts}){N, Ts, Tx}(x::AbstractVector{Tx})
-    result = zero(promote_type(Ts, Tx))
+    typealias T promote_type(Ts, Tx)
+    result = zero(T)
     num_points = length(surface.points)
     for i = 1:num_points
+        point = surface.points[i]
         n = norm(x - surface.points[i])
+        if n >= 1e-9
+            result += surface.weights[i] * surface.phi(n)
+        end
+    end
+
+    result += evaluate(surface.offset, x)
+end
+
+function (surface::InterpolatingSurface{3, Ts}){Ts, Tx}(x::AbstractVector{Tx})
+    typealias T promote_type(Ts, Tx)
+    result = zero(T)
+    num_points = length(surface.points)
+    for i = 1:num_points
+        point = surface.points[i]
+        n = sqrt((x[1] - point[1])^2 + (x[2] - point[2])^2 + (x[3] - point[3])^2)
         if n >= 1e-9
             result += surface.weights[i] * surface.phi(n)
         end
