@@ -51,7 +51,6 @@ end
     values = vcat([0.0 for i in edge_points], [-1.0 for i in interior_points])
     surface = InterpolatingSurface(points, values, SpatialFields.XCubed(), true)
 
-    @show SpatialFields.gradient(surface)([10, 0.5])
     @test isapprox(SpatialFields.gradient(surface)([10, 0.5]), [1, 0], atol=1e-3)
     @test isapprox(SpatialFields.gradient(surface)([-10, 0.5]), [-1, 0], atol=1e-3)
     @test isapprox(SpatialFields.gradient(surface)([0.5, 10]), [0, 1], atol=1e-3)
