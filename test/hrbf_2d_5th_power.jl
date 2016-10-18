@@ -13,7 +13,7 @@ function hrbf_2d_5th_power()
 	Y = linspace(-2, 2)
 	Z = zeros(length(X), length(Y))
 
-	@time for i = 1:length(X)
+    for i = 1:length(X)
 	    for j = 1:length(Y)
 	        Z[j,i] = field([X[i], Y[j]])
 	    end

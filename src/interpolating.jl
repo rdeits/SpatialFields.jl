@@ -6,7 +6,8 @@ type InterpolatingSurface{N, T, F <: Function} <: AbstractScalarField{N}
 end
 
 function InterpolatingSurface{Dimension, T, Tv}(points::Vector{SVector{Dimension, T}}, values::AbstractVector{Tv},
-    phi::Function=XSquaredLogX())
+    phi::Function=XCubed(),
+    normalize=false)
     @assert length(points) == length(values)
     @assert Dimension <= 3
 
@@ -39,6 +40,14 @@ function InterpolatingSurface{Dimension, T, Tv}(points::Vector{SVector{Dimension
 
     weights = y[1:num_points]
     p = y[num_points+1:end]
+    if normalize
+        # Normalize the surface's SDF values to try to ensure that they
+        # represent real distances
+        averaging_factor = (1 + (Dimension - 1) / 2) / Dimension
+        average_slope = averaging_factor * 3 * sum(weights .* (p -> sum(p .^ 2)).(points))
+        weights ./= average_slope
+        p ./= average_slope
+    end
 
     terms = OrderedDict(zeros(Int, Dimension) => p[1])
     for i = 1:Dimension
@@ -47,35 +56,23 @@ function InterpolatingSurface{Dimension, T, Tv}(points::Vector{SVector{Dimension
         terms[powers] = p[i+1]
     end
     offset = MultiPoly.MPoly{T}(terms, [:x, :y, :z][1:Dimension])
+
     InterpolatingSurface(weights, points, offset, phi)
 end
 
-function (surface::InterpolatingSurface{N, Ts}){N, Ts, Tx}(x::AbstractVector{Tx})
+Base.norm{T <: Real}(x::SVector{2, T}) = sqrt(x[1]^2 + x[2]^2)
+Base.norm{T <: Real}(x::SVector{3, T}) = sqrt(x[1]^2 + x[2]^2 + x[3]^2)
+Base.norm{T <: Real}(x::MVector{2, T}) = sqrt(x[1]^2 + x[2]^2)
+Base.norm{T <: Real}(x::MVector{3, T}) = sqrt(x[1]^2 + x[2]^2 + x[3]^2)
+
+function (surface::InterpolatingSurface{N, Ts}){N, Ts, Tx}(x::AbstractVector{Tx})::promote_type(Ts, Tx)
     typealias T promote_type(Ts, Tx)
-    result = zero(T)
-    num_points = length(surface.points)
-    for i = 1:num_points
-        point = surface.points[i]
+    result::T = zero(T)
+    for i = eachindex(surface.points)
         n = norm(x - surface.points[i])
         if n >= 1e-9
             result += surface.weights[i] * surface.phi(n)
         end
     end
-
-    result += evaluate(surface.offset, x)
-end
-
-function (surface::InterpolatingSurface{3, Ts}){Ts, Tx}(x::AbstractVector{Tx})
-    typealias T promote_type(Ts, Tx)
-    result = zero(T)
-    num_points = length(surface.points)
-    for i = 1:num_points
-        point = surface.points[i]
-        n = sqrt((x[1] - point[1])^2 + (x[2] - point[2])^2 + (x[3] - point[3])^2)
-        if n >= 1e-9
-            result += surface.weights[i] * surface.phi(n)
-        end
-    end
-
-    result += evaluate(surface.offset, x)
+    result + evaluate(surface.offset, x)
 end
