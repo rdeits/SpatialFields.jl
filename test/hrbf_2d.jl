@@ -11,7 +11,7 @@ function hrbf_2d()
 	Y = linspace(-2, 2)
 	Z = zeros(length(X), length(Y))
 
-	@time for i = 1:length(X)
+	for i = 1:length(X)
 	    for j = 1:length(Y)
 	        Z[j,i] = field([X[i], Y[j]])
 	    end

@@ -6,7 +6,7 @@ import ForwardDiff
 import MultiPoly
 import Base: convert
 import DataStructures: OrderedDict
-import StaticArrays: SVector
+import StaticArrays: SVector, MVector
 
 export InterpolatingSurface,
     HermiteRadialField,

@@ -2,22 +2,17 @@ using SpatialFields
 using Base.Test
 using Iterators
 
-function hrbf_3d()
-	points = SVector{3, Float64}[[1; 0; 0], [0; 1; 0], [-1; 0; 0], [0; -1; 0], [0; 0; 1], [0; 0; -1]]
-	normals = SVector{3, Float64}[[1; -1; 0], [0; 1; 0], [-1; 0; 0], [0; -1; 0], [1; 0; 1], [0; 0; -1]]
+points = SVector{3, Float64}[[1; 0; 0], [0; 1; 0], [-1; 0; 0], [0; -1; 0], [0; 0; 1], [0; 0; -1]]
+normals = SVector{3, Float64}[[1; -1; 0], [0; 1; 0], [-1; 0; 0], [0; -1; 0], [1; 0; 1], [0; 0; -1]]
 
 
-	field = HermiteRadialField(points, normals)
-	@time field = HermiteRadialField(points, normals)
+field = HermiteRadialField(points, normals)
 
-	X = linspace(-2, 2)
-	Y = linspace(-2, 2)
-	Z = linspace(-2, 2)
+X = linspace(-2, 2)
+Y = linspace(-2, 2)
+Z = linspace(-2, 2)
 
-	field([X[1], Y[1], Z[1]])
-	v = [X[1], Y[1], Z[1]]
-	@time for j = 1:1e5; field(v); end
-	@time C = [field([x,y,z]) for (x,y,z) in product(X, Y, Z)];
+for (i, point) in enumerate(points)
+    @test isapprox(field(point), 0, atol=1e-6)
+    @test isapprox(SpatialFields.gradient(field)(point), normals[i], atol=1e-6)
 end
-
-hrbf_3d()
